@@ -51,7 +51,7 @@ export interface Ledger {
 
 export async function fetchLedger(): Promise<Ledger | null> {
   try {
-    const res = await fetch('/resolutions.json', { cache: 'no-store' });
+    const res = await fetch(`${import.meta.env.BASE_URL}resolutions.json`, { cache: 'no-store' });
     if (!res.ok) return null;
     const j = await res.json();
     return j && Array.isArray(j.cycles) ? (j as Ledger) : null;

@@ -3,6 +3,8 @@
 A live **forecast game + agent wire** for [Cookie Chain](https://cookiechain.wtf) — built for the
 [Superteam cApp bounty](https://superteam.fun/earn/listing/create-an-app-on-cookie-chain-app).
 
+**Live app:** https://amgainprabesh.github.io/cookie-prophet/ — auto-deployed from `main` via GitHub Pages.
+
 **The idea, in one line:** the chain is the content — a live wire of real on-chain events (pools,
 flows, launches, price moves), plus market cycles you can call.
 
