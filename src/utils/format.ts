@@ -46,3 +46,13 @@ export function fmtCountdown(ms: number): string {
   const m = Math.floor((ms % 3_600_000) / 60_000);
   return h > 0 ? `${h}h ${m}m` : `${Math.max(1, m)}m`;
 }
+
+export function utcShort(ts: number): string {
+  const d = new Date(ts);
+  const month = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][
+    d.getUTCMonth()
+  ];
+  const hh = String(d.getUTCHours()).padStart(2, '0');
+  const mm = String(d.getUTCMinutes()).padStart(2, '0');
+  return `${month} ${d.getUTCDate()} · ${hh}:${mm} UTC`;
+}

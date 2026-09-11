@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "updatedAt": "2026-09-11T06:09:13.348Z",
+  "cycles": [
+    {
+      "id": "2026-09-11T08:00:00.000Z",
+      "kind": "inaugural",
+      "openedAt": 1789106951856,
+      "closesAt": 1789113600000,
+      "open": {
+        "poolCount": 160,
+        "slot": 24458116,
+        "fetchedAt": 1789106951856
+      },
+      "markets": [
+        {
+          "id": "m1",
+          "type": "pool-count-increase",
+          "question": "Will a new pool appear before close?",
+          "rule": "YES if the tracked pool count at close is greater than at open.",
+          "source": "api.cookiescan.io/api/markets",
+          "params": {}
+        },
+        {
+          "id": "m2",
+          "type": "slot-advance",
+          "question": "Will the chain advance 14,200+ slots before close?",
+          "rule": "YES if the slot at close is at least 14,200 higher than at open.",
+          "source": "rpc.cookiescan.io getSlot",
+          "params": {
+            "minDelta": 14200
+          }
+        }
+      ],
+      "resolvedAt": null,
+      "outcomes": null
+    }
+  ]
+}
