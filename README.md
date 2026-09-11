@@ -45,7 +45,7 @@ flows, launches, price moves), plus market cycles you can call.
 
 ## Run it
 ```bash
-npm install --omit=optional   # then pin native binaries (see note below on Windows/OneDrive)
+npm install
 npm run dev                   # http://localhost:3100
 npm run build
 node scripts/wire-smoke.mjs   # live-data smoke test for the wire engine
@@ -54,8 +54,8 @@ node scripts/resolve.mjs      # advance market cycles (idempotent; run by CI eve
 node scripts/resolve.mjs --status  # audit the public ledger
 ```
 
-On Windows under OneDrive, npm can fight optional dependency trees: install with
-`--omit=optional`, then `npm install -D @rollup/rollup-win32-x64-msvc@<rollup-version> @esbuild/win32-x64@<esbuild-version>`.
+Deploys: pushing to `main` publishes the built site to GitHub Pages; the resolver
+Action advances cycles every 30 minutes.
 
 ## License
 MIT
