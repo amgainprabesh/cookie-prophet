@@ -321,6 +321,8 @@ async function main() {
     return;
   }
 
+  const before = JSON.stringify(ledger.cycles);
+
   // finalize every cycle whose close time has passed
   for (const c of ledger.cycles) {
     if (!c.resolvedAt && now >= c.closesAt) {
@@ -356,7 +358,12 @@ async function main() {
     await openCycle(ledger, kind, closesAt);
   }
 
-  saveLedger(ledger);
+  if (JSON.stringify(ledger.cycles) !== before) {
+    saveLedger(ledger);
+    console.log('[ledger] updated');
+  } else {
+    console.log('[ledger] no changes');
+  }
 }
 
 main().catch((e) => {
