@@ -12,6 +12,25 @@ export interface LedgerMarket {
   params?: Record<string, number>;
 }
 
+export interface AgentPick {
+  pick: 'YES' | 'NO';
+  reason: string;
+}
+
+export interface AgentState {
+  id: string;
+  name: string;
+  strategy: string;
+  picks: Record<string, AgentPick>;
+  paper?: {
+    updatedAt: number;
+    note: string;
+    positions: Array<{ pair: string; venue: string; marketId: string; liquidityUsd: number }>;
+    decisions: string[];
+  };
+  committed?: { wallet: string; sigs: Record<string, string>; committedAt: number } | null;
+}
+
 export interface LedgerCycle {
   id: string;
   kind: 'inaugural' | 'daily' | string;
@@ -21,6 +40,7 @@ export interface LedgerCycle {
   markets: LedgerMarket[];
   resolvedAt: number | null;
   outcomes: Record<string, LedgerOutcome> | null;
+  agent?: AgentState;
 }
 
 export interface Ledger {

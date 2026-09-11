@@ -3,6 +3,7 @@ import { Header } from './components/Header';
 import { WireFeed } from './components/WireFeed';
 import { ForecastPanel } from './components/ForecastPanel';
 import { BookPanel } from './components/BookPanel';
+import { AgentPanel } from './components/AgentPanel';
 import { StatusPanel } from './components/StatusPanel';
 import { Footer } from './components/Footer';
 import { ConnectModal } from './components/ConnectModal';
@@ -22,6 +23,7 @@ function Shell() {
         </section>
         <aside className="space-y-6">
           <ForecastPanel />
+          <AgentPanel />
           <BookPanel />
           <StatusPanel />
         </aside>

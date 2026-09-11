@@ -5,17 +5,15 @@ const LIVE = [
   'Wallet connect — Nightly (wallet-standard), Phantom, Solflare',
   'On-chain call receipts — every call commits as a memo transaction',
   'Auto-resolver — cycles settle from chain data alone, ledger public',
+  'The Prophet agent — deterministic picks with published reasoning + paper book',
 ];
 
-const NEXT = [
-  'The Prophet agent — public calls, paper book, powered by cookie-mcp',
-  'Season leaderboard, streaks & badges',
-];
+const NEXT = ['Season leaderboard & badges', 'Agent picks committed on-chain (needs agent gas)'];
 
 export const StatusPanel: React.FC = () => (
   <div className="rounded-2xl border border-cookie-200/80 bg-white/80 shadow-sm p-4 sm:p-5">
     <h2 className="text-sm font-extrabold tracking-tight text-stone-900">Build status</h2>
-    <p className="text-[11px] text-stone-500 mt-0.5">v0.3 — resolution engine live</p>
+    <p className="text-[11px] text-stone-500 mt-0.5">v0.4 — the Prophet agent is in</p>
 
     <div className="mt-3.5 space-y-3">
       <div>
