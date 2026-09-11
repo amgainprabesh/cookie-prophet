@@ -35,3 +35,11 @@ export interface ChainPulse {
   slot: number;
   version: string;
 }
+
+export interface CallRecord {
+  marketId: string;
+  pick: 'YES' | 'NO';
+  sig: string;
+  ts: number;
+  wallet: string;
+}

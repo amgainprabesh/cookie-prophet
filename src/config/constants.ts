@@ -1,3 +1,5 @@
+import { PublicKey } from '@solana/web3.js';
+
 export const CHAIN = {
   rpc: 'https://rpc.cookiescan.io',
   wss: 'https://wss.cookiescan.io',
@@ -22,7 +24,13 @@ export const LS = {
   events: 'cp_v1_events',
   snap: 'cp_v1_snap',
   seenAssets: 'cp_v1_seen_assets',
+  calls: 'cp_v1_calls',
+  wallet: 'cp_v1_wallet',
 } as const;
+
+// SPL Memo program (v2) — verified live on Cookie Chain RPC.
+export const MEMO_PROGRAM_ID = new PublicKey('MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr');
+export const MEMO_PREFIX = 'cookie-prophet';
 
 export function explorerTxUrl(sig: string): string {
   return `${CHAIN.explorer}/tx/${sig}`;

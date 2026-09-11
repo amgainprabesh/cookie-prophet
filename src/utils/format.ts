@@ -33,3 +33,16 @@ export function clockTime(ts: number): string {
   const d = new Date(ts);
   return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 }
+
+/** Timestamp of the next 00:00 UTC after `from`. */
+export function nextUtcMidnight(from = Date.now()): number {
+  const d = new Date(from);
+  return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() + 1, 0, 0, 0, 0);
+}
+
+export function fmtCountdown(ms: number): string {
+  if (ms <= 0) return 'closed';
+  const h = Math.floor(ms / 3_600_000);
+  const m = Math.floor((ms % 3_600_000) / 60_000);
+  return h > 0 ? `${h}h ${m}m` : `${Math.max(1, m)}m`;
+}

@@ -4,9 +4,12 @@ import { WireFeed } from './components/WireFeed';
 import { ForecastPanel } from './components/ForecastPanel';
 import { StatusPanel } from './components/StatusPanel';
 import { Footer } from './components/Footer';
+import { ConnectModal } from './components/ConnectModal';
+import { Toasts } from './components/Toasts';
 import { useWire } from './hooks/useWire';
+import { WalletProvider } from './context/WalletContext';
 
-export default function App() {
+function Shell() {
   const { events, pulse, lastPoll, polling, refresh, tick } = useWire();
 
   return (
@@ -22,6 +25,16 @@ export default function App() {
         </aside>
       </main>
       <Footer />
+      <ConnectModal />
+      <Toasts />
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <WalletProvider>
+      <Shell />
+    </WalletProvider>
   );
 }

@@ -2,12 +2,12 @@ import React from 'react';
 
 const LIVE = [
   'The Wire — real pool, flow, launch & price events straight from Cookie Chain',
-  'Live chain pulse (slot + core version)',
+  'Wallet connect — Nightly (wallet-standard), Phantom, Solflare, Backpack',
+  'On-chain call receipts — every forecast call commits as a memo transaction',
 ];
 
 const NEXT = [
-  'Wallet connect (Nightly) + on-chain call commits (memo receipts)',
-  'Auto-resolver: markets close & resolve from chain data alone',
+  'Auto-resolver — markets settle from chain data alone',
   'The Prophet agent — public calls, paper book, powered by cookie-mcp',
   'Season leaderboard, streaks & badges',
 ];
@@ -15,7 +15,7 @@ const NEXT = [
 export const StatusPanel: React.FC = () => (
   <div className="rounded-2xl border border-cookie-200/80 bg-white/80 shadow-sm p-4 sm:p-5">
     <h2 className="text-sm font-extrabold tracking-tight text-stone-900">Build status</h2>
-    <p className="text-[11px] text-stone-500 mt-0.5">v0.1 — the feed layer is live</p>
+    <p className="text-[11px] text-stone-500 mt-0.5">v0.2 — calls are on-chain</p>
 
     <div className="mt-3.5 space-y-3">
       <div>
