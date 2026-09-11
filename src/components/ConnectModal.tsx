@@ -2,7 +2,7 @@ import React from 'react';
 import { Check, Copy, LogOut, Sparkles, X } from 'lucide-react';
 import { useWallet } from '../context/WalletContext';
 import { CHAIN, LINKS } from '../config/constants';
-import { short } from '../utils/format';
+import { fmtCook, short } from '../utils/format';
 
 export const ConnectModal: React.FC = () => {
   const {
@@ -65,9 +65,7 @@ export const ConnectModal: React.FC = () => {
               <div className="mt-2.5 pt-2.5 border-t border-cookie-100 flex items-center justify-between">
                 <span className="text-[11.5px] text-stone-500">Balance</span>
                 <span className="font-mono text-[12.5px] font-bold text-stone-800">
-                  {balanceCook === null
-                    ? '…'
-                    : `${balanceCook.toLocaleString(undefined, { maximumFractionDigits: 4 })} COOK`}
+                  {balanceCook === null ? '…' : `${fmtCook(balanceCook)} COOK`}
                 </span>
               </div>
             </div>

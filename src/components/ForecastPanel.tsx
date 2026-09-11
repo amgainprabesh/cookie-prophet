@@ -2,7 +2,12 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { CheckCircle2, ExternalLink, Hourglass, Loader2, XCircle } from 'lucide-react';
 import { useWallet } from '../context/WalletContext';
 import { useLedger } from '../hooks/useLedger';
-import { openCycle, lastResolvedForMarket, type LedgerMarket } from '../services/ledger';
+import {
+  assignedCycleForCall,
+  lastResolvedForMarket,
+  openCycle,
+  type LedgerMarket,
+} from '../services/ledger';
 import { callForMarket, evidenceLine } from '../services/points';
 import { explorerTxUrl } from '../config/constants';
 import { fmtCountdown, nextUtcMidnight, utcShort } from '../utils/format';
@@ -71,8 +76,12 @@ export const ForecastPanel: React.FC = () => {
           const mine = callForMarket(ledger, calls, wallet, m.id);
           const sending = sendingId === m.id;
           const resolved = lastResolvedForMarket(ledger, m.id);
-          const myResolvedRow =
-            resolved && mine && mine.cycle.id === resolved.cycle.id ? mine : null;
+          const myResolvedCall = resolved
+            ? (calls
+                .filter((c) => c.wallet === wallet && c.marketId === m.id)
+                .filter((c) => assignedCycleForCall(ledger, m.id, c.ts)?.id === resolved.cycle.id)
+                .sort((a, b) => b.ts - a.ts)[0] ?? null)
+            : null;
 
           return (
             <div key={m.id} className="rounded-xl border border-cookie-200/80 p-3.5 bg-white">
@@ -151,19 +160,19 @@ export const ForecastPanel: React.FC = () => {
                     </span>
                     <span className="text-stone-400">· {evidenceLine(m.id, resolved.outcome.evidence)}</span>
                   </div>
-                  {myResolvedRow && (
+                  {myResolvedCall && (
                     <div className="flex items-center gap-1.5 text-[11px] mt-1">
-                      {myResolvedRow.call.pick === resolved.outcome.outcome ? (
+                      {myResolvedCall.pick === resolved.outcome.outcome ? (
                         <>
                           <CheckCircle2 className="w-3 h-3 text-emerald-500" />
                           <span className="text-stone-600 font-semibold">
-                            you called {myResolvedRow.call.pick} — +10 pts
+                            you called {myResolvedCall.pick} — +10 pts
                           </span>
                         </>
                       ) : (
                         <>
                           <XCircle className="w-3 h-3 text-rose-400" />
-                          <span className="text-stone-500">you called {myResolvedRow.call.pick} — no pts</span>
+                          <span className="text-stone-500">you called {myResolvedCall.pick} — no pts</span>
                         </>
                       )}
                     </div>

@@ -115,6 +115,13 @@ export function listWalletOptions(): WalletOption[] {
   ];
 }
 
+export interface ConnectorEvents {
+  /** The wallet itself ended the session (user disconnected in the extension). */
+  onDisconnect: () => void;
+  /** The wallet switched to a different account. */
+  onAccountChanged: (pk: PublicKey) => void;
+}
+
 export interface Connector {
   id: string;
   name: string;
@@ -122,6 +129,11 @@ export interface Connector {
   /** Sign a fully-built transaction; resolves to serialized signed bytes. */
   signSerialized(tx: Transaction): Promise<Uint8Array>;
   disconnect(): Promise<void>;
+  /**
+   * Watch wallet-originated events. Returns an unsubscribe function,
+   * or null when the wallet doesn't support events.
+   */
+  subscribe?(handlers: ConnectorEvents): (() => void) | null;
 }
 
 const NAMES: Record<string, string> = {
@@ -166,7 +178,10 @@ async function connectNightly(opts: { silent?: boolean }): Promise<Connector> {
     const pk = new PublicKey(account.address);
     const signFeature = n.features?.['solana:signTransaction'];
 
-    return {
+    // holder keeps the live account so account switches are reflected
+    const holder: { account: any } = { account };
+
+    const connector: Connector = {
       id: 'nightly',
       name: 'Nightly',
       publicKey: pk,
@@ -175,13 +190,13 @@ async function connectNightly(opts: { silent?: boolean }): Promise<Connector> {
           throw new Error('Nightly exposes no transaction signing feature.');
         }
         const transaction = tx.serialize({ requireAllSignatures: false, verifySignatures: false });
-        const input: any = { account, transaction };
+        const input: any = { account: holder.account, transaction };
         let out: any;
         try {
           out = await signFeature.signTransaction(input);
         } catch {
           // some wallets want the chain identifier explicitly
-          out = await signFeature.signTransaction({ ...input, chain: account.chains?.[0] });
+          out = await signFeature.signTransaction({ ...input, chain: holder.account?.chains?.[0] });
         }
         const signed = out?.[0]?.signedTransaction;
         if (!signed) throw new Error('Nightly did not return a signed transaction.');
@@ -192,7 +207,40 @@ async function connectNightly(opts: { silent?: boolean }): Promise<Connector> {
           await n.features?.['standard:disconnect']?.disconnect?.();
         } catch {}
       },
+      subscribe: (handlers: ConnectorEvents) => {
+        const events = n.features?.['standard:events'];
+        if (!events?.on) return null;
+        const listener = (props: any) => {
+          const accounts = props?.accounts;
+          if (!accounts || accounts.length === 0) {
+            try {
+              handlers.onDisconnect();
+            } catch {}
+            return;
+          }
+          const acc = accounts[0];
+          if (acc?.address && acc.address !== holder.account?.address) {
+            holder.account = acc;
+            try {
+              const newPk = new PublicKey(acc.address);
+              connector.publicKey = newPk;
+              handlers.onAccountChanged(newPk);
+            } catch {}
+          }
+        };
+        try {
+          events.on('change', listener);
+        } catch {
+          return null;
+        }
+        return () => {
+          try {
+            events.off?.('change', listener);
+          } catch {}
+        };
+      },
     };
+    return connector;
   }
 
   if (legacyReady(n)) return connectLegacy('nightly', n, opts);
@@ -211,7 +259,9 @@ async function connectLegacy(id: string, raw: any, opts: { silent?: boolean }): 
   if (!pkRaw) throw new Error(`${NAMES[id] || id} returned no public key.`);
   const pk = new PublicKey(pkRaw.toString());
 
-  return {
+  const holder: { pk: PublicKey } = { pk };
+
+  const connector: Connector = {
     id,
     name: NAMES[id] || id,
     publicKey: pk,
@@ -224,5 +274,46 @@ async function connectLegacy(id: string, raw: any, opts: { silent?: boolean }): 
         await raw.disconnect?.();
       } catch {}
     },
+    subscribe: (handlers: ConnectorEvents) => {
+      if (typeof raw.on !== 'function') return null;
+      const offs: Array<() => void> = [];
+      const onDis = () => {
+        try {
+          handlers.onDisconnect();
+        } catch {}
+      };
+      const onAcct = (newPk: any) => {
+        if (!newPk) {
+          try {
+            handlers.onDisconnect();
+          } catch {}
+          return;
+        }
+        try {
+          const p = new PublicKey(newPk.toString());
+          holder.pk = p;
+          connector.publicKey = p;
+          handlers.onAccountChanged(p);
+        } catch {}
+      };
+      try {
+        raw.on('disconnect', onDis);
+        offs.push(() => {
+          try {
+            raw.off?.('disconnect', onDis);
+          } catch {}
+        });
+        raw.on('accountChanged', onAcct);
+        offs.push(() => {
+          try {
+            raw.off?.('accountChanged', onAcct);
+          } catch {}
+        });
+      } catch {
+        return null;
+      }
+      return () => offs.forEach((f) => f());
+    },
   };
+  return connector;
 }

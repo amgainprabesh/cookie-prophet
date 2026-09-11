@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Bot, CheckCircle2, ExternalLink, Sparkles } from 'lucide-react';
 import { useLedger } from '../hooks/useLedger';
-import { openCycle, type AgentPick } from '../services/ledger';
+import { openCycle, type AgentPick, type LedgerCycle } from '../services/ledger';
 import { explorerTxUrl } from '../config/constants';
-import { fmtCountdown, timeAgo } from '../utils/format';
+import { fmtCountdown, timeAgo, utcShort } from '../utils/format';
 
 function PickRow({ id, pickData, outcome }: { id: string; pickData?: AgentPick; outcome?: 'YES' | 'NO' }) {
   if (!pickData) return null;
@@ -25,8 +25,21 @@ function PickRow({ id, pickData, outcome }: { id: string; pickData?: AgentPick; 
 
 export const AgentPanel: React.FC = () => {
   const { ledger } = useLedger();
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), 30_000);
+    return () => clearInterval(t);
+  }, []);
+
   const cycle = openCycle(ledger);
   const agent = cycle?.agent;
+
+  const settled: LedgerCycle | null = ledger
+    ? ([...ledger.cycles]
+        .filter((c) => c.resolvedAt && c.agent?.picks && c.outcomes)
+        .sort((a, b) => (b.resolvedAt ?? 0) - (a.resolvedAt ?? 0))[0] ?? null)
+    : null;
 
   return (
     <div className="rounded-2xl border border-prophet-200/80 bg-white/80 shadow-sm">
@@ -60,13 +73,33 @@ export const AgentPanel: React.FC = () => {
         ) : (
           <>
             <p className="text-[11.5px] text-stone-500 leading-snug">
-              Calls for the {cycle!.kind} cycle (closes in {fmtCountdown(cycle!.closesAt - Date.now())}).
+              Calls for the {cycle!.kind} cycle (closes in {fmtCountdown(cycle!.closesAt - now)}).
               Deterministic — same data, same pick, anyone can re-run it.
             </p>
             <ul className="mt-2.5 space-y-2">
               <PickRow id="m1" pickData={agent.picks.m1} />
               <PickRow id="m2" pickData={agent.picks.m2} />
             </ul>
+
+            {settled && (
+              <div className="mt-3.5 pt-3 border-t border-prophet-100">
+                <p className="text-[10px] font-extrabold tracking-wider text-stone-400">
+                  LAST SETTLED · closed {utcShort(settled.closesAt)}
+                </p>
+                <ul className="mt-1.5 space-y-2">
+                  <PickRow
+                    id="m1"
+                    pickData={settled.agent!.picks.m1}
+                    outcome={settled.outcomes?.m1?.outcome}
+                  />
+                  <PickRow
+                    id="m2"
+                    pickData={settled.agent!.picks.m2}
+                    outcome={settled.outcomes?.m2?.outcome}
+                  />
+                </ul>
+              </div>
+            )}
 
             {agent.paper && (
               <div className="mt-3.5 pt-3 border-t border-prophet-100">

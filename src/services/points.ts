@@ -5,6 +5,8 @@ export interface BookRow {
   marketId: string;
   question: string;
   closesAt: number;
+  /** when the call was actually made — used for deterministic streak order */
+  ts: number;
   pick: 'YES' | 'NO';
   outcome: 'YES' | 'NO' | null;
   correct: boolean | null;
@@ -40,7 +42,7 @@ export function callForMarket(
 /**
  * Points: a correct call on a resolved cycle = +10. "Last call before close counts":
  * when several calls map to the same cycle, only the latest one scores.
- * Streak: trailing consecutive correct calls (pending calls don't break it).
+ * Streak: consecutive correct calls in call-time order (pending calls don't break it).
  */
 export function computeBook(ledger: Ledger | null, calls: CallRecord[], wallet: string | null): Book {
   const book: Book = { points: 0, streak: 0, calls: 0, correct: 0, rows: [] };
@@ -68,6 +70,7 @@ export function computeBook(ledger: Ledger | null, calls: CallRecord[], wallet: 
         marketId: market.id,
         question: market.question,
         closesAt: cycle.closesAt,
+        ts: call.ts,
         pick: call.pick,
         outcome,
         correct,
@@ -81,8 +84,12 @@ export function computeBook(ledger: Ledger | null, calls: CallRecord[], wallet: 
     }
   }
 
+  // display order: most recent close first
   book.rows.sort((a, b) => b.closesAt - a.closesAt);
-  for (const row of book.rows) {
+
+  // streak: deterministic — walk calls in the order they were made
+  const byCallTime = [...book.rows].sort((a, b) => b.ts - a.ts);
+  for (const row of byCallTime) {
     if (row.correct === true) book.streak += 1;
     else if (row.correct === false) break;
     // pending rows (correct === null) are skipped

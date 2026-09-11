@@ -2,7 +2,7 @@ import React from 'react';
 import type { ChainPulse } from '../types';
 import { LINKS } from '../config/constants';
 import { useWallet } from '../context/WalletContext';
-import { short } from '../utils/format';
+import { fmtCook, short } from '../utils/format';
 
 interface HeaderProps {
   pulse: ChainPulse | null;
@@ -47,9 +47,7 @@ export const Header: React.FC<HeaderProps> = ({ pulse }) => {
               <span className="font-mono">{short(publicKey.toBase58(), 4, 4)}</span>
               <span className="text-stone-300">·</span>
               <span className="font-mono text-stone-500">
-                {balanceCook === null
-                  ? '…'
-                  : `${balanceCook.toLocaleString(undefined, { maximumFractionDigits: 3 })} COOK`}
+                {balanceCook === null ? '…' : `${fmtCook(balanceCook)} COOK`}
               </span>
             </button>
           ) : (

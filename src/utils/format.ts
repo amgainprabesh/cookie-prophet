@@ -56,3 +56,13 @@ export function utcShort(ts: number): string {
   const mm = String(d.getUTCMinutes()).padStart(2, '0');
   return `${month} ${d.getUTCDate()} · ${hh}:${mm} UTC`;
 }
+
+/** COOK amounts: keeps tiny balances (gas leftovers) readable instead of "0". */
+export function fmtCook(v: number): string {
+  if (!Number.isFinite(v)) return '—';
+  if (v === 0) return '0';
+  const abs = Math.abs(v);
+  if (abs >= 1) return v.toLocaleString(undefined, { maximumFractionDigits: 4 });
+  if (abs >= 1e-4) return v.toFixed(7).replace(/0+$/, '').replace(/\.$/, '');
+  return v.toFixed(9).replace(/0+$/, '').replace(/\.$/, '');
+}

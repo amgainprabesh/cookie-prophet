@@ -89,6 +89,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [modalOpen, setModalOpen] = useState(false);
 
   const connectorRef = useRef<Connector | null>(null);
+  const unsubRef = useRef<(() => void) | null>(null);
 
   const addToast = useCallback((type: Toast['type'], title: string, message?: string, link?: string) => {
     const id = Math.random().toString(36).slice(2, 9);
@@ -113,8 +114,28 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }
   }, []);
 
+  /** Reset all wallet state and detach event listeners (no provider calls). */
+  const clearWalletState = useCallback(() => {
+    try {
+      unsubRef.current?.();
+    } catch {}
+    unsubRef.current = null;
+    connectorRef.current = null;
+    setPublicKey(null);
+    setWalletName('');
+    setBalanceCook(null);
+    setStatus('disconnected');
+    try {
+      localStorage.removeItem(LS.wallet);
+    } catch {}
+  }, []);
+
   const adoptConnector = useCallback(
     async (c: Connector) => {
+      try {
+        unsubRef.current?.();
+      } catch {}
+      unsubRef.current = null;
       connectorRef.current = c;
       setPublicKey(c.publicKey);
       setWalletName(c.name);
@@ -123,8 +144,26 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         localStorage.setItem(LS.wallet, c.id);
       } catch {}
       refreshBalance(c.publicKey);
+
+      // watch wallet-originated events so the UI stays honest
+      try {
+        unsubRef.current =
+          c.subscribe?.({
+            onDisconnect: () => {
+              clearWalletState();
+              addToast('info', 'Wallet disconnected', 'The wallet ended the session.');
+            },
+            onAccountChanged: (pk) => {
+              setPublicKey(pk);
+              refreshBalance(pk);
+              addToast('info', 'Wallet account changed', `${pk.toBase58().slice(0, 6)}…`);
+            },
+          }) ?? null;
+      } catch {
+        unsubRef.current = null;
+      }
     },
-    [refreshBalance]
+    [refreshBalance, clearWalletState, addToast]
   );
 
   const connect = useCallback(
@@ -145,18 +184,15 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   const disconnect = useCallback(async () => {
     try {
+      unsubRef.current?.();
+    } catch {}
+    unsubRef.current = null;
+    try {
       await connectorRef.current?.disconnect();
     } catch {}
-    connectorRef.current = null;
-    setPublicKey(null);
-    setWalletName('');
-    setBalanceCook(null);
-    setStatus('disconnected');
-    try {
-      localStorage.removeItem(LS.wallet);
-    } catch {}
+    clearWalletState();
     addToast('info', 'Wallet disconnected');
-  }, [addToast]);
+  }, [clearWalletState, addToast]);
 
   // silent reconnect on load
   useEffect(() => {
