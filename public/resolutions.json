@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-22T03:00:38.614Z",
+  "updatedAt": "2026-09-23T01:38:52.200Z",
   "cycles": [
     {
       "id": "2026-09-11T08:00:00.000Z",
@@ -1165,8 +1165,30 @@
           }
         }
       ],
-      "resolvedAt": null,
-      "outcomes": null,
+      "resolvedAt": 1790127509894,
+      "outcomes": {
+        "m1": {
+          "outcome": "NO",
+          "evidence": {
+            "open": 169,
+            "close": 169,
+            "at": 1790127509894,
+            "lateMs": 5909894,
+            "source": "api.cookiescan.io/api/markets"
+          }
+        },
+        "m2": {
+          "outcome": "YES",
+          "evidence": {
+            "open": 26522464,
+            "close": 26702504,
+            "minDelta": 161900,
+            "at": 1790127509894,
+            "lateMs": 5909894,
+            "source": "rpc.cookiescan.io getSlot"
+          }
+        }
+      },
       "agent": {
         "id": "prophet-v1",
         "name": "The Prophet",
@@ -1202,6 +1224,82 @@
               "venue": "METEORA DAMM",
               "marketId": "HoKrYgC3Bp7o8iofj1npXPjbgrXzgnbMb7EKKgRkaSTa",
               "liquidityUsd": 487.68962876792693
+            }
+          ],
+          "decisions": [
+            "opened paper positions in the top-3 pools by liquidity"
+          ]
+        },
+        "committed": null
+      }
+    },
+    {
+      "id": "2026-09-24T00:00:00.000Z",
+      "kind": "daily",
+      "openedAt": 1790127510678,
+      "closesAt": 1790208000000,
+      "open": {
+        "poolCount": 169,
+        "slot": 26702505,
+        "fetchedAt": 1790127510678
+      },
+      "markets": [
+        {
+          "id": "m1",
+          "type": "pool-count-increase",
+          "question": "Will a new pool appear before close?",
+          "rule": "YES if the tracked pool count at close is greater than at open.",
+          "source": "api.cookiescan.io/api/markets",
+          "params": {}
+        },
+        {
+          "id": "m2",
+          "type": "slot-advance",
+          "question": "Will the chain advance 172,400+ slots before close?",
+          "rule": "YES if the slot at close is at least 172,400 higher than at open.",
+          "source": "rpc.cookiescan.io getSlot",
+          "params": {
+            "minDelta": 172400
+          }
+        }
+      ],
+      "resolvedAt": null,
+      "outcomes": null,
+      "agent": {
+        "id": "prophet-v1",
+        "name": "The Prophet",
+        "strategy": "velocity-measurement + base-rate-v1",
+        "picks": {
+          "m2": {
+            "pick": "YES",
+            "reason": "measured 2.40 slots/s over 20s (49 slots) → projects 193,150 vs target 172,400"
+          },
+          "m1": {
+            "pick": "NO",
+            "reason": "new pools appeared in 4/13 resolved cycles — base rate favors NO"
+          }
+        },
+        "paper": {
+          "updatedAt": 1790127532200,
+          "note": "paper only — no funds; positions follow the top pools by liquidity",
+          "positions": [
+            {
+              "pair": "bCOOK/wCOOK",
+              "venue": "COOKIESWAP CPAMM",
+              "marketId": "DmzxJyiCpoW9FC2iimG2fDm24LW5C8YbFtVJGVKrePkc",
+              "liquidityUsd": 1238.9895616421068
+            },
+            {
+              "pair": "bCOOK/wCOOK",
+              "venue": "COOKIEBOX DAMM",
+              "marketId": "GHfzn5A59d3uKUz2UrR8mQsA612ZyhTjPhTxNcdAiSUx",
+              "liquidityUsd": 1237.724055614363
+            },
+            {
+              "pair": "TRASHCOIN/wCOOK",
+              "venue": "METEORA DAMM",
+              "marketId": "HoKrYgC3Bp7o8iofj1npXPjbgrXzgnbMb7EKKgRkaSTa",
+              "liquidityUsd": 458.27599515844554
             }
           ],
           "decisions": [
