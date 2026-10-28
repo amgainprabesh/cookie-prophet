@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-10-27T01:58:10.176Z",
+  "updatedAt": "2026-10-28T01:59:34.553Z",
   "cycles": [
     {
       "id": "2026-09-11T08:00:00.000Z",
@@ -4595,8 +4595,30 @@
           }
         }
       ],
-      "resolvedAt": null,
-      "outcomes": null,
+      "resolvedAt": 1793152752453,
+      "outcomes": {
+        "m1": {
+          "outcome": "YES",
+          "evidence": {
+            "open": 175,
+            "close": 177,
+            "at": 1793152752453,
+            "lateMs": 7152453,
+            "source": "api.cookiescan.io/api/markets"
+          }
+        },
+        "m2": {
+          "outcome": "YES",
+          "evidence": {
+            "open": 33194083,
+            "close": 33383860,
+            "minDelta": 169900,
+            "at": 1793152752453,
+            "lateMs": 7152453,
+            "source": "rpc.cookiescan.io getSlot"
+          }
+        }
+      },
       "agent": {
         "id": "prophet-v1",
         "name": "The Prophet",
@@ -4632,6 +4654,82 @@
               "venue": "COOKIEBOX DAMM",
               "marketId": "DdaR5PnyaLMhFF54RFQAtFNY7LURu58Pw8BRHThE1J5L",
               "liquidityUsd": 694.8563038744564
+            }
+          ],
+          "decisions": [
+            "opened paper positions in the top-3 pools by liquidity"
+          ]
+        },
+        "committed": null
+      }
+    },
+    {
+      "id": "2026-10-29T00:00:00.000Z",
+      "kind": "daily",
+      "openedAt": 1793152753403,
+      "closesAt": 1793232000000,
+      "open": {
+        "poolCount": 177,
+        "slot": 33383860,
+        "fetchedAt": 1793152753403
+      },
+      "markets": [
+        {
+          "id": "m1",
+          "type": "pool-count-increase",
+          "question": "Will a new pool appear before close?",
+          "rule": "YES if the tracked pool count at close is greater than at open.",
+          "source": "api.cookiescan.io/api/markets",
+          "params": {}
+        },
+        {
+          "id": "m2",
+          "type": "slot-advance",
+          "question": "Will the chain advance 169,700+ slots before close?",
+          "rule": "YES if the slot at close is at least 169,700 higher than at open.",
+          "source": "rpc.cookiescan.io getSlot",
+          "params": {
+            "minDelta": 169700
+          }
+        }
+      ],
+      "resolvedAt": null,
+      "outcomes": null,
+      "agent": {
+        "id": "prophet-v1",
+        "name": "The Prophet",
+        "strategy": "velocity-measurement + base-rate-v1",
+        "picks": {
+          "m2": {
+            "pick": "NO",
+            "reason": "measured 2.05 slots/s over 20s (42 slots) → projects 162,506 vs target 169,700"
+          },
+          "m1": {
+            "pick": "NO",
+            "reason": "new pools appeared in 11/48 resolved cycles — base rate favors NO"
+          }
+        },
+        "paper": {
+          "updatedAt": 1793152774552,
+          "note": "paper only — no funds; positions follow the top pools by liquidity",
+          "positions": [
+            {
+              "pair": "bCOOK/wCOOK",
+              "venue": "COOKIESWAP CPAMM",
+              "marketId": "DmzxJyiCpoW9FC2iimG2fDm24LW5C8YbFtVJGVKrePkc",
+              "liquidityUsd": 1615.638221281054
+            },
+            {
+              "pair": "bCOOK/wCOOK",
+              "venue": "COOKIEBOX DAMM",
+              "marketId": "GHfzn5A59d3uKUz2UrR8mQsA612ZyhTjPhTxNcdAiSUx",
+              "liquidityUsd": 1611.6994651500322
+            },
+            {
+              "pair": "COOKHOUSE/wCOOK",
+              "venue": "COOKIEBOX DAMM",
+              "marketId": "DdaR5PnyaLMhFF54RFQAtFNY7LURu58Pw8BRHThE1J5L",
+              "liquidityUsd": 785.8540547102714
             }
           ],
           "decisions": [
